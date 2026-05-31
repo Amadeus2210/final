@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
-const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
+
+const DB_URL =
+  "mongodb://admin:amadeuswaifu221005@ac-voegqcs-shard-00-00.zwm49zf.mongodb.net:27017,ac-voegqcs-shard-00-01.zwm49zf.mongodb.net:27017,ac-voegqcs-shard-00-02.zwm49zf.mongodb.net:27017/final-project?ssl=true&replicaSet=atlas-10k3vj-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0";
 
 const mongoOptions = {
   serverSelectionTimeoutMS: 10000,
@@ -8,13 +9,8 @@ const mongoOptions = {
 };
 
 async function dbConnect() {
-  if (!process.env.DB_URL) {
-    console.error("Missing DB_URL. Add DB_URL to backend/.env or CodeSandbox environment variables.");
-    return;
-  }
-
   mongoose
-    .connect(process.env.DB_URL, mongoOptions)
+    .connect(DB_URL, mongoOptions)
     .then(() => {
       console.log("Successfully connected to MongoDB Atlas!");
     })
