@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 
 const models = require("../modelData/models.js");
 
@@ -10,11 +11,21 @@ const SchemaInfo = require("../db/schemaInfo.js");
 const versionString = "1.0";
 
 async function dbLoad() {
+  if (!process.env.DB_URL) {
+    console.error("Missing DB_URL. Add DB_URL to backend/.env or CodeSandbox environment variables.");
+    process.exit(1);
+  }
+
   try {
-    await mongoose.connect(process.env.DB_URL);
+    await mongoose.connect(process.env.DB_URL, {
+      serverSelectionTimeoutMS: 10000,
+      family: 4,
+    });
     console.log("Successfully connected to MongoDB Atlas!");
   } catch (error) {
     console.log("Unable connecting to MongoDB Atlas!");
+    console.error(error.message);
+    process.exit(1);
   }
 
   await User.deleteMany({});
