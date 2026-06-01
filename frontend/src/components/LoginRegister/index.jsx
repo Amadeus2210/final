@@ -5,7 +5,6 @@ import {
   TextField,
   Typography,
   Paper,
-  Alert,
   Divider,
 } from "@mui/material";
 import { AppContext } from "../../AppContext";
@@ -107,20 +106,20 @@ function LoginRegister() {
         padding: 2,
       }}
     >
-      <Paper elevation={3} sx={{ padding: 4, width: "100%", maxWidth: 400 }}>
+      <Paper variant="outlined" sx={{ padding: 4, width: "100%", maxWidth: 400 }}>
         <Typography variant="h5" gutterBottom align="center">
           {isLogin ? "Login" : "Register"}
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Typography role="alert" sx={{ mb: 2 }}>
             {error}
-          </Alert>
+          </Typography>
         )}
         {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
+          <Typography role="status" sx={{ mb: 2 }}>
             {success}
-          </Alert>
+          </Typography>
         )}
 
         <form onSubmit={isLogin ? handleLogin : handleRegister}>
@@ -205,8 +204,8 @@ function LoginRegister() {
 
           <Button
             fullWidth
-            variant="contained"
-            color="primary"
+            variant="outlined"
+            color="inherit"
             type="submit"
             sx={{ mt: 3, mb: 2 }}
           >
@@ -219,6 +218,7 @@ function LoginRegister() {
         <Box textAlign="center">
           <Button
             variant="text"
+            color="inherit"
             onClick={() => {
               setIsLogin(!isLogin);
               setError("");

@@ -100,7 +100,7 @@ function UserPhotos() {
       </Typography>
 
       {photos.map((photo) => (
-        <Card key={photo._id} sx={{ mb: 3 }}>
+        <Card key={photo._id} variant="outlined" sx={{ mb: 3 }}>
           <CardMedia
             component="img"
             sx={{
@@ -111,7 +111,7 @@ function UserPhotos() {
             alt={photo.file_name}
           />
           <CardContent>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="subtitle2">
               {fmt(photo.date_time)}
             </Typography>
 
@@ -148,7 +148,8 @@ function UserPhotos() {
                 onChange={(e) => handleCommentChange(photo._id, e.target.value)}
               />
               <Button
-                variant="contained"
+                variant="outlined"
+                color="inherit"
                 onClick={() => handleAddComment(photo._id)}
                 disabled={!newComments[photo._id]}
               >

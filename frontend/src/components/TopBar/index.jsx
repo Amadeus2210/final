@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Snackbar,
-  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../AppContext";
@@ -18,7 +17,6 @@ function TopBar() {
   const { user, appTitle, logout } = useContext(AppContext);
   const navigate = useNavigate();
   const [uploadMessage, setUploadMessage] = useState("");
-  const [severity, setSeverity] = useState("success");
 
   const rightText = user ? appTitle : "";
 
@@ -47,17 +45,13 @@ function TopBar() {
       });
 
       if (response.ok) {
-        setSeverity("success");
-        setUploadMessage("upload thành công");
-        // Redirect to user's photos page
+        setUploadMessage("Upload thanh cong");
         navigate(`/photos/${user._id}`);
       } else {
         const data = await response.json();
-        setSeverity("error");
         setUploadMessage(`Upload failed: ${data.error}`);
       }
     } catch (err) {
-      setSeverity("error");
       setUploadMessage(`Upload error: ${err.message}`);
     }
   };
@@ -71,11 +65,16 @@ function TopBar() {
 
   return (
     <>
-      <AppBar className="topbar-appBar" position="absolute">
+      <AppBar
+        className="topbar-appBar"
+        position="absolute"
+        color="inherit"
+        elevation={0}
+      >
         <Toolbar>
           <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
             <Typography variant="h6" color="inherit">
-              Ngô Quốc Hiệu B23DCCN318
+              Ngo Quoc Hieu B23DCCN318
             </Typography>
           </Box>
 
@@ -86,8 +85,8 @@ function TopBar() {
                   Hi {user.first_name}
                 </Typography>
                 <Button
-                  variant="contained"
-                  color="secondary"
+                  variant="outlined"
+                  color="inherit"
                   size="small"
                   onClick={handleUploadButtonClick}
                 >
@@ -128,16 +127,8 @@ function TopBar() {
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={severity}
-          variant="filled"
-          sx={{ width: "100%", boxShadow: 3 }}
-        >
-          {uploadMessage}
-        </Alert>
-      </Snackbar>
+        message={uploadMessage}
+      />
     </>
   );
 }
