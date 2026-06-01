@@ -8,7 +8,6 @@ const PhotoRouter = require("./routes/PhotoRouter");
 const AdminRouter = require("./routes/AdminRouter");
 const Photo = require("./db/photoModel");
 const User = require("./db/userModel");
-const authMiddleware = require("./middleware/authMiddleware");
 
 dbConnect();
 

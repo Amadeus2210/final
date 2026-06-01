@@ -1,7 +1,8 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const Photo = require("../db/photoModel");
 const User = require("../db/userModel")
-const authMiddleware = require("../middleware/authMiddleware");
 const multer = require("multer");
 const router = express.Router();
 
@@ -16,7 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.get("/list", authMiddleware, async (request, response) => {
+router.get("/list", async (request, response) => {
   try {
     const photos = await Photo.find({});
     response.json(photos);
@@ -25,12 +26,15 @@ router.get("/list", authMiddleware, async (request, response) => {
   }
 });
 
-router.post("/commentsOfPhoto/:photo_id", authMiddleware, async (request, response) => {
+router.post("/commentsOfPhoto/:photo_id", async (request, response) => {
   const photoId = request.params.photo_id;
-  const { comment } = request.body;
+  const { comment, user_id } = request.body;
 
   if (!comment) {
     return response.status(400).json({ error: "Comment text is required" });
+  }
+  if (!user_id) {
+    return response.status(400).json({ error: "User ID is required" });
   }
 
   try {
@@ -41,7 +45,7 @@ router.post("/commentsOfPhoto/:photo_id", authMiddleware, async (request, respon
 
     const newComment = {
       comment: comment,
-      user_id: request.user.userId,
+      user_id: user_id,
       date_time: new Date(),
     };
 
@@ -55,15 +59,18 @@ router.post("/commentsOfPhoto/:photo_id", authMiddleware, async (request, respon
   }
 });
 
-router.post("/new", authMiddleware, upload.single("photo"), async (request, response) => {
+router.post("/new", upload.single("photo"), async (request, response) => {
   if (!request.file) {
     return response.status(400).json({ error: "No photo file uploaded" });
+  }
+  if (!request.body.user_id) {
+    return response.status(400).json({ error: "User ID is required" });
   }
 
   try {
     const newPhoto = new Photo({
       file_name: request.file.filename,
-      user_id: request.user.userId,
+      user_id: request.body.user_id,
       date_time: new Date(),
       comments: [],
     });
@@ -76,8 +83,46 @@ router.post("/new", authMiddleware, upload.single("photo"), async (request, resp
   }
 });
 
+router.delete("/:photo_id", async (request, response) => {
+  const photoId = request.params.photo_id;
+  const { user_id } = request.body;
 
-router.get("/photosOfUser/:id", authMiddleware, async (request, response) => {
+  if (!photoId.match(/^[0-9a-fA-F]{24}$/)) {
+    return response.status(400).json({ error: "Invalid photo ID format" });
+  }
+  if (!user_id) {
+    return response.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const photo = await Photo.findById(photoId);
+    if (!photo) {
+      return response.status(404).json({ error: "Photo not found" });
+    }
+    if (photo.user_id.toString() !== user_id) {
+      return response.status(403).json({ error: "Cannot delete another user's photo" });
+    }
+
+    await Photo.deleteOne({ _id: photoId });
+
+    const imagePath = path.join(__dirname, "..", "images", path.basename(photo.file_name));
+    try {
+      await fs.promises.unlink(imagePath);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+
+    response.json({ message: "Photo deleted successfully" });
+  } catch (error) {
+    console.error("Delete photo error:", error);
+    response.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+router.get("/photosOfUser/:id", async (request, response) => {
   try {
     const userId = request.params.id;
     if (!userId.match(/^[0-9a-fA-F]{24}$/)) {

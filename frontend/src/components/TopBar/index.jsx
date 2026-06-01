@@ -34,13 +34,11 @@ function TopBar() {
 
     const formData = new FormData();
     formData.append("photo", file);
+    formData.append("user_id", user._id);
 
     try {
       const response = await fetch(apiUrl("/api/photo/new"), {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: formData,
       });
 
@@ -81,9 +79,6 @@ function TopBar() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {user ? (
               <>
-                <Typography variant="subtitle1" color="inherit">
-                  Hi {user.first_name}
-                </Typography>
                 <Button
                   variant="outlined"
                   color="inherit"

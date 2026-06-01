@@ -25,7 +25,7 @@ function UserPhotos() {
   const [user, setUser] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [newComments, setNewComments] = useState({}); // photoId -> commentText
-  const { setAppTitle } = useContext(AppContext);
+  const { user: currentUser, setAppTitle } = useContext(AppContext);
 
   const fetchData = useCallback(async () => {
     try {
@@ -66,15 +66,37 @@ function UserPhotos() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ comment: text }),
+          body: JSON.stringify({ comment: text, user_id: currentUser?._id }),
         },
       );
 
       if (response.ok) {
         setNewComments((prev) => ({ ...prev, [photoId]: "" }));
         fetchData(); // Refresh photos to show new comment
+      } else {
+        const data = await response.json();
+        alert(`Error: ${data.error}`);
+      }
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    if (!currentUser?._id) return;
+
+    try {
+      const response = await fetch(apiUrl(`/api/photo/${photoId}`), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: currentUser._id }),
+      });
+
+      if (response.ok) {
+        setPhotos((prev) => prev.filter((photo) => photo._id !== photoId));
       } else {
         const data = await response.json();
         alert(`Error: ${data.error}`);
@@ -111,9 +133,21 @@ function UserPhotos() {
             alt={photo.file_name}
           />
           <CardContent>
-            <Typography variant="subtitle2">
-              {fmt(photo.date_time)}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+              <Typography variant="subtitle2">
+                {fmt(photo.date_time)}
+              </Typography>
+              {currentUser?._id === String(photo.user_id) ? (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  onClick={() => handleDeletePhoto(photo._id)}
+                >
+                  Delete
+                </Button>
+              ) : null}
+            </Box>
 
             <Divider sx={{ my: 1 }} />
 

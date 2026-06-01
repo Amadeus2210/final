@@ -1,10 +1,9 @@
 const express = require("express");
 const User = require("../db/userModel");
 const bcrypt = require("bcryptjs");
-const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
-router.get("/list", authMiddleware, async (request, response) => {
+router.get("/list", async (request, response) => {
   try {
     const users = await User.find({}).select("_id first_name last_name");
     response.json(users);
@@ -14,7 +13,7 @@ router.get("/list", authMiddleware, async (request, response) => {
 });
 
 
-router.get("/:id", authMiddleware, async (request, response) => {
+router.get("/:id", async (request, response) => {
   try {
     const userId = request.params.id;
 
